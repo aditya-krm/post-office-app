@@ -17,7 +17,7 @@ export default function Index() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <SearchBar />
+          <SearchBar initialQuery={""} />
           <DeliveryForm />
         </ScrollView>
       </SafeAreaView>

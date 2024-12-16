@@ -1,8 +1,13 @@
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, glassmorphism } from "../styles/shared";
+import { router } from "expo-router";
 
 export function Header() {
+  const handleDashboardPress = () => {
+    router.push("/dashboard");
+  };
+
   return (
     <View style={[styles.header]}>
       <View style={styles.logoContainer}>
@@ -11,9 +16,7 @@ export function Header() {
       </View>
       <TouchableOpacity
         style={styles.dashboardButton}
-        onPress={() => {
-          /* Handle dashboard navigation */
-        }}
+        onPress={handleDashboardPress}
       >
         <Ionicons name="grid-outline" size={24} color={colors.text} />
       </TouchableOpacity>

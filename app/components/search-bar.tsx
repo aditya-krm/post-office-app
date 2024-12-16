@@ -1,16 +1,36 @@
 import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, glassmorphism } from "../styles/shared";
+import { useState } from "react";
+import { router, usePathname } from "expo-router";
 
-export function SearchBar() {
+export function SearchBar({ initialQuery }: { initialQuery: string }) {
+  const pathname = usePathname();
+  const [searchTerm, setSearchTerm] = useState(initialQuery || "");
+
+  const handleSearch = () => {
+    if (!searchTerm.trim()) return;
+
+    if (pathname.startsWith("/search")) router.setParams({ query: searchTerm });
+    else router.push(`/search/${searchTerm}`);
+  };
+
   return (
     <View style={[styles.searchContainer, glassmorphism.background]}>
-      <Ionicons name="search" size={20} color={colors.textSecondary} />
       <TextInput
         style={styles.searchInput}
         placeholder="Search consignments..."
         placeholderTextColor={colors.textSecondary}
         selectionColor={colors.primary}
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+        onSubmitEditing={handleSearch}
+      />
+      <Ionicons
+        name="search"
+        size={20}
+        color={colors.textSecondary}
+        onPress={handleSearch}
       />
     </View>
   );

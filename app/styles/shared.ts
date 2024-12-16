@@ -11,6 +11,10 @@ export const colors = {
   textSecondary: "rgba(255, 255, 255, 0.6)",
   border: "rgba(255, 255, 255, 0.1)",
   cardBackground: "rgba(30, 41, 59, 0.7)",
+  success: "#4CAF50",
+  error: "#F44336",
+  warning: "#FFC107",
+  info: "#2196F3",
 };
 
 export const glassmorphism = StyleSheet.create({

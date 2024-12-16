@@ -1,26 +1,75 @@
 import { useState } from "react";
-import { View, TextInput, Text, StyleSheet } from "react-native";
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { RadioButton } from "./radio-button";
 import { colors, glassmorphism } from "../styles/shared";
+import { addConsignments } from "../api/base";
 
 const DELIVERY_STATUSES = [
-  { id: "not_delivered", label: "Not Delivered" },
-  { id: "try_deliver", label: "Try to Deliver" },
+  { id: "not-delivered", label: "Not Delivered" },
+  { id: "try-to-deliver", label: "Try to Deliver" },
   { id: "delivered", label: "Delivered" },
 ];
 
 export function DeliveryForm() {
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [form, setForm] = useState({
+    consignmentNumber: "",
+    toWhom: "",
+    status: "",
+    statusMessage: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const getDetailsPlaceholder = () => {
-    if (!selectedStatus) return "Add additional details";
-    const status = DELIVERY_STATUSES.find((s) => s.id === selectedStatus);
+    if (!form.status) return "Add additional details";
+    const status = DELIVERY_STATUSES.find((s) => s.id === form.status);
     return `Add additional details for ${status?.label}`;
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    if (
+      !form.consignmentNumber ||
+      !form.toWhom ||
+      !form.status ||
+      !form.statusMessage
+    ) {
+      alert("Please fill all the fields");
+      setSubmitting(false);
+      return;
+    }
+
+    const consignmentForm = {
+      consignmentNumber: form.consignmentNumber,
+      whomeToDeliver: form.toWhom,
+      status: form.status,
+      statusMessage: form.statusMessage,
+    };
+    console.log("consignmentForm", consignmentForm);
+
+    await addConsignments(consignmentForm);
+    setSubmitting(false);
+    setForm({
+      consignmentNumber: "",
+      toWhom: "",
+      status: "",
+      statusMessage: "",
+    });
+    setNotification("Delivery details submitted successfully!");
+    setTimeout(() => setNotification(null), 5000);
   };
 
   return (
     <View style={[styles.container, glassmorphism.background]}>
       <Text style={styles.title}>Delivery Details</Text>
+
+      {notification && <Text style={styles.notification}>{notification}</Text>}
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Consignment Number</Text>
@@ -29,6 +78,8 @@ export function DeliveryForm() {
           placeholder="Enter consignment number"
           placeholderTextColor={colors.textSecondary}
           selectionColor={colors.primary}
+          value={form.consignmentNumber}
+          onChangeText={(text) => setForm({ ...form, consignmentNumber: text })}
         />
       </View>
 
@@ -39,6 +90,8 @@ export function DeliveryForm() {
           placeholder="Enter recipient name"
           placeholderTextColor={colors.textSecondary}
           selectionColor={colors.primary}
+          value={form.toWhom}
+          onChangeText={(text) => setForm({ ...form, toWhom: text })}
         />
       </View>
 
@@ -49,8 +102,8 @@ export function DeliveryForm() {
             <RadioButton
               key={status.id}
               label={status.label}
-              selected={selectedStatus === status.id}
-              onSelect={() => setSelectedStatus(status.id)}
+              selected={form.status === status.id}
+              onSelect={() => setForm({ ...form, status: status.id })}
             />
           ))}
         </View>
@@ -65,8 +118,20 @@ export function DeliveryForm() {
           multiline
           numberOfLines={4}
           selectionColor={colors.primary}
+          value={form.statusMessage}
+          onChangeText={(text) => setForm({ ...form, statusMessage: text })}
         />
       </View>
+
+      <TouchableOpacity
+        style={styles.saveButton}
+        activeOpacity={0.8}
+        onPress={handleSubmit}
+      >
+        <Text style={styles.saveButtonText}>
+          {submitting ? "Saving..." : "Submit"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -109,5 +174,33 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: "top",
+  },
+  saveButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    shadowColor: colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  saveButtonText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  notification: {
+    fontSize: 16,
+    color: colors.success,
+    marginTop: 16,
   },
 });
